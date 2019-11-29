@@ -20,11 +20,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -49,11 +53,11 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/app/api/**", "/captcha.jpg", "/session/invalid").permitAll()
                 .anyRequest().authenticated()
                 .and()
-//                .formLogin().loginPage("/myLogin.html").permitAll()
+                .formLogin().loginPage("/myLogin.html").permitAll()
                 // 自定义URL
 //                .formLogin().loginPage("/myLogin.html").loginProcessingUrl("/login").permitAll()
                 // 登录返回json，不跳转URL
-                .formLogin()
+//                .formLogin()
 //                .formLogin().authenticationDetailsSource(authenticationDetailsSource)
 //                .loginPage("/myLogin.html").loginProcessingUrl("/auth/form")
 //                .successHandler((HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) -> {
@@ -67,6 +71,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 //                        PrintWriter out = httpServletResponse.getWriter();
 //                        out.write("{\"error_code\":\"401\", \"name\":\"" + e.getClass() + "\", \"message\":\"" + e.getMessage() +  "\"}");
 //                }).permitAll()
+                .and().cors()
                 .and()
                 .csrf().disable()
 //                .addFilterBefore(new VerificationCodeFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -92,7 +97,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().maximumSessions(1)
 //                .maxSessionsPreventsLogin(true)
                 .sessionRegistry(redisSessionRegistry)
-
         ;
     }
 
@@ -154,6 +158,17 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         DefaultKaptcha defaultKaptcha = new DefaultKaptcha();
         defaultKaptcha.setConfig(config);
         return defaultKaptcha;
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8081"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 }

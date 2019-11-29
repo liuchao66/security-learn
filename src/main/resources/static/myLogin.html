@@ -3,6 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        // window.jsonp = function(data) {
+        //     console.dir(data)
+        // }
+        var getJsonp = function(url, success) {
+            window.jsonp = function(data) {
+                success(data);
+            };
+            var src = '';
+            if (url.indexOf('?') != -1) {
+                src = url + '&callback=jsonp';
+            } else {
+                src = url + '?callback=jsonp';
+            }
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = src;
+            document.head.appendChild(script);
+        }
+        getJsonp('/app/api/admin', function(data) {
+            console.log('得到jsonp数据：', JSON.stringify(data))
+        });
+    </script>
+<!--    <script src="/app/api/admin?callback=jsonp"></script>-->
+    <script>
+        var request = new XMLHttpRequest();
+        var url = "http://localhost:8080/app/api/users";
+        if (request) {
+            request.open('POST', url, true);
+            request.withCredentials = true;
+            request.onreadystatechange = function() {
+                if (request.readyState == 4 && request.status == 200) {
+                    console.dir(request.responseText);
+                }
+            };
+            request.send();
+        }
+
+        var setting = {
+            "async": true,
+            "crossDomain": true,
+            "xhrFields": {
+                "withCredentials": true
+            },
+            "url": "http://localhost:8080/app/api/admin?callback=test",
+            "method": "GET"
+        };
+        $.ajax(setting).done(function(response) {
+            console.log(response);
+        });
+    </script>
 </head>
 <body>
     <form action="/auth/form" method="post">
