@@ -19,6 +19,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -50,16 +51,16 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/admin/api/**").hasAuthority("ROLE_ADMIN")
                 .antMatchers("/user/api/**").hasRole("USER")
-                .antMatchers("/app/api/**", "/captcha.jpg", "/session/invalid").permitAll()
+                .antMatchers("/app/api/**", "/captcha.jpg", "/session/invalid", "/csrfLogout").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .formLogin().loginPage("/myLogin.html").permitAll()
+//                .formLogin().loginPage("/myLogin.html").permitAll()
                 // 自定义URL
 //                .formLogin().loginPage("/myLogin.html").loginProcessingUrl("/login").permitAll()
                 // 登录返回json，不跳转URL
-//                .formLogin()
+                .formLogin()
 //                .formLogin().authenticationDetailsSource(authenticationDetailsSource)
-//                .loginPage("/myLogin.html").loginProcessingUrl("/auth/form")
+//                .loginPage("/myLogin.html").loginProcessingUrl("/auth/form").permitAll()
 //                .successHandler((HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) -> {
 //                        httpServletResponse.setContentType("application/json;charset=UTF-8");
 //                        PrintWriter out = httpServletResponse.getWriter();
@@ -73,14 +74,16 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 //                }).permitAll()
                 .and().cors()
                 .and()
-                .csrf().disable()
+//                .csrf().disable()
+                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
+//                .csrf().csrfTokenRepository(new LazyCsrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())).and()
 //                .addFilterBefore(new VerificationCodeFilter(), UsernamePasswordAuthenticationFilter.class)
 //                .rememberMe().userDetailsService(userDetailsService)
 ////                .key("liuchao")
 //                .tokenRepository(tokenRepository).tokenValiditySeconds(30)
 //                .and()
-//                .logout()
-                .logout().logoutUrl("/myLogout")
+                .logout()
+//                .logout().logoutUrl("/myLogout")
 //                .logoutSuccessUrl("/")
                 .logoutSuccessHandler((HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) -> {
                     httpServletResponse.setContentType("application/json;charset=UTF-8");

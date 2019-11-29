@@ -44,4 +44,5 @@ public class CaptchaController {
         outputStream.flush();
         outputStream.close();
     }
+
 }

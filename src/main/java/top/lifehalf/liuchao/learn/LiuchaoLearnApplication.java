@@ -24,7 +24,7 @@ public class LiuchaoLearnApplication {
     @GetMapping("/")
     public String hello() {
 //        return "<a href='/logout'>注销<a/>" +
-        return "<a href='/myLogout'>注销<a/>" +
+        return "<a href='/csrfLogout.html'>注销<a/>" +
                 "hello, spring security" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
     }
 
