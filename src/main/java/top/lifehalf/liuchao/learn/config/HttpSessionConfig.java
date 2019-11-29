@@ -10,9 +10,8 @@ package top.lifehalf.liuchao.learn.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.session.FindByIndexNameSessionRepository;
-import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
 /**
@@ -23,7 +22,7 @@ import org.springframework.session.security.SpringSessionBackedSessionRegistry;
  * @author liuchao4
  * @since 2019/11/28 14:45
  */
-@EnableRedisHttpSession
+@Configuration
 public class HttpSessionConfig {
 
     @Autowired
@@ -34,9 +33,6 @@ public class HttpSessionConfig {
         return new SpringSessionBackedSessionRegistry(sessionRepository);
     }
 
-    @Bean
-    public HttpSessionEventPublisher httpSessionEventPublisher() {
-        return new HttpSessionEventPublisher();
-    }
+
 
 }

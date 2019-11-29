@@ -3,9 +3,12 @@ package top.lifehalf.liuchao.learn;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +18,7 @@ import java.util.Date;
 @SpringBootApplication
 @RestController
 @MapperScan("top.lifehalf.liuchao.learn.mapper")
+@EnableRedisHttpSession
 public class LiuchaoLearnApplication {
 
     @GetMapping("/")
@@ -41,6 +45,8 @@ public class LiuchaoLearnApplication {
         return manager;
     }
 
-
-
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
+    }
 }
