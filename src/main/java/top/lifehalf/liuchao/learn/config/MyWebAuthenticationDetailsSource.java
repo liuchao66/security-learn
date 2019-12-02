@@ -9,7 +9,6 @@ package top.lifehalf.liuchao.learn.config;
 
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author liuchao4
  * @since 2019/11/27 18:01
  */
-@Component
+//@Component
 public class MyWebAuthenticationDetailsSource implements AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> {
     @Override
     public WebAuthenticationDetails buildDetails(HttpServletRequest request) {

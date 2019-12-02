@@ -14,7 +14,6 @@ import org.springframework.security.authentication.dao.AbstractUserDetailsAuthen
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Component;
 
 /**
  * <p>
@@ -24,7 +23,7 @@ import org.springframework.stereotype.Component;
  * @author liuchao4
  * @since 2019/11/27 16:11
  */
-@Component
+//@Component
 public class MyAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
     @Autowired

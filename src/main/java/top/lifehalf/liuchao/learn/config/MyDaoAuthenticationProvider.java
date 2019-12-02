@@ -13,7 +13,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 /**
  * <p>
@@ -23,7 +22,7 @@ import org.springframework.stereotype.Component;
  * @author liuchao4
  * @since 2019/11/27 17:08
  */
-@Component
+//@Component
 public class MyDaoAuthenticationProvider extends DaoAuthenticationProvider {
 
     public MyDaoAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {

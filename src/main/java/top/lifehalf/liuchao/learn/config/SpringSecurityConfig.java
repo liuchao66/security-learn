@@ -10,16 +10,19 @@ package top.lifehalf.liuchao.learn.config;
 import com.google.code.kaptcha.Producer;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.google.code.kaptcha.util.Config;
+import org.jasig.cas.client.session.SingleSignOutFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.cas.web.CasAuthenticationFilter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -40,8 +43,23 @@ import java.util.Properties;
  * @author liuchao4
  * @since 2019/11/25 17:37
  */
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private AuthenticationProvider authenticationProvider;
+
+    @Autowired
+    private AuthenticationEntryPoint entryPoint;
+
+    @Autowired
+    private SingleSignOutFilter singleSignOutFilter;
+
+    @Autowired
+    private LogoutFilter logoutFilter;
+
+    @Autowired
+    private CasAuthenticationFilter casAuthenticationFilter;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -50,8 +68,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.authorizeRequests()
                 .antMatchers("/admin/api/**").hasAuthority("ROLE_ADMIN")
-                .antMatchers("/user/api/**").hasRole("USER")
-                .antMatchers("/app/api/**", "/captcha.jpg", "/session/invalid", "/csrfLogout").permitAll()
+                .antMatchers("/user/**").hasRole("USER")
+                .antMatchers("/login/cas", "/app/api/**","/favicon.ico", "/error", "/captcha.jpg", "/session/invalid",
+                        "/csrfLogout").permitAll()
                 .anyRequest().authenticated()
                 .and()
 //                .formLogin().loginPage("/myLogin.html").permitAll()
@@ -72,10 +91,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 //                        PrintWriter out = httpServletResponse.getWriter();
 //                        out.write("{\"error_code\":\"401\", \"name\":\"" + e.getClass() + "\", \"message\":\"" + e.getMessage() +  "\"}");
 //                }).permitAll()
-                .and().cors()
+//                .and().cors()
                 .and()
-//                .csrf().disable()
-                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
+                .csrf().disable()
+//                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
 //                .csrf().csrfTokenRepository(new LazyCsrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())).and()
 //                .addFilterBefore(new VerificationCodeFilter(), UsernamePasswordAuthenticationFilter.class)
 //                .rememberMe().userDetailsService(userDetailsService)
@@ -90,16 +109,21 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                     PrintWriter out = httpServletResponse.getWriter();
                     out.write("{\"error_code\":\"0\", \"message\":\"欢迎再次登录\"}");
                 })
-                .invalidateHttpSession(true)
+//                .invalidateHttpSession(true)
 //                .deleteCookies("").addLogoutHandler()
                 .and()
+                .exceptionHandling().authenticationEntryPoint(entryPoint)
+                .and().addFilter(casAuthenticationFilter)
+                .addFilterBefore(singleSignOutFilter, CasAuthenticationFilter.class)
+                .addFilterBefore(logoutFilter, LogoutFilter.class)
 //                .sessionManagement().sessionFixation().none()
 //                .sessionManagement()
 //                .invalidSessionUrl("/session/invalid")
 //                .invalidSessionStrategy(new MyInvalidSessionStrategy())
-                .sessionManagement().maximumSessions(1)
+//                .sessionManagement().maximumSessions(1)
 //                .maxSessionsPreventsLogin(true)
-                .sessionRegistry(redisSessionRegistry)
+//                .sessionRegistry(redisSessionRegistry)
+
         ;
     }
 
@@ -112,8 +136,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+//    @Autowired
+//    private PasswordEncoder passwordEncoder;
 
 //    @Autowired
 //    private MyAuthenticationProvider myAuthenticationProvider;
@@ -143,11 +167,12 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 //        authenticationProvider.setPasswordEncoder(passwordEncoder);
 //        auth.authenticationProvider(authenticationProvider);
 
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+//        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
 
 //        auth.authenticationProvider(myAuthenticationProvider);
 
 //        auth.authenticationProvider(myDaoAuthenticationProvider);
+        auth.authenticationProvider(authenticationProvider);
     }
 
     @Bean
@@ -163,7 +188,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         return defaultKaptcha;
     }
 
-    @Bean
+//    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:8081"));

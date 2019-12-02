@@ -8,7 +8,6 @@
 package top.lifehalf.liuchao.learn.config;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
 
 import java.util.regex.Pattern;
 
@@ -20,7 +19,7 @@ import java.util.regex.Pattern;
  * @author liuchao4
  * @since 2019/11/26 18:00
  */
-@Component
+//@Component
 public class MyPasswordEncoder
 //        implements PasswordEncoder
     extends BCryptPasswordEncoder {
