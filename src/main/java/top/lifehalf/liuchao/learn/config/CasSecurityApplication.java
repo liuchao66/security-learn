@@ -12,7 +12,6 @@ import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.jasig.cas.client.validation.TicketValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -37,7 +36,7 @@ import java.util.Arrays;
  * @author liuchao4
  * @since 2019/11/29 18:43
  */
-@Configuration
+//@Configuration
 public class CasSecurityApplication {
 
     @Value("${cas.server.prefix}")

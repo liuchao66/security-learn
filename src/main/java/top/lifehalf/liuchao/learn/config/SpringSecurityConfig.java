@@ -10,28 +10,18 @@ package top.lifehalf.liuchao.learn.config;
 import com.google.code.kaptcha.Producer;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.google.code.kaptcha.util.Config;
-import org.jasig.cas.client.session.SingleSignOutFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.cas.web.CasAuthenticationFilter;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.session.security.SpringSessionBackedSessionRegistry;
+import org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.www.DigestAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -46,20 +36,42 @@ import java.util.Properties;
 @EnableWebSecurity(debug = true)
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private AuthenticationProvider authenticationProvider;
+//    @Autowired
+//    private AuthenticationProvider authenticationProvider;
+//
+//    @Autowired
+//    private AuthenticationEntryPoint entryPoint;
+//
+//    @Autowired
+//    private SingleSignOutFilter singleSignOutFilter;
+//
+//    @Autowired
+//    private LogoutFilter logoutFilter;
+//
+//    @Autowired
+//    private CasAuthenticationFilter casAuthenticationFilter;
 
     @Autowired
-    private AuthenticationEntryPoint entryPoint;
+    private DigestAuthenticationEntryPoint myDigestEntryPoint;
 
     @Autowired
-    private SingleSignOutFilter singleSignOutFilter;
+    private UserDetailsService userDetailsService;
 
-    @Autowired
-    private LogoutFilter logoutFilter;
+    @Bean
+    public DigestAuthenticationEntryPoint digestEntryPoint() {
+        DigestAuthenticationEntryPoint digestAuthenticationEntryPoint = new DigestAuthenticationEntryPoint();
+        digestAuthenticationEntryPoint.setKey("https://github.com/blurooo");
+        digestAuthenticationEntryPoint.setRealmName("spring security");
+        digestAuthenticationEntryPoint.setNonceValiditySeconds(500);
+        return digestAuthenticationEntryPoint;
+    }
 
-    @Autowired
-    private CasAuthenticationFilter casAuthenticationFilter;
+    public DigestAuthenticationFilter digestAuthenticationFilter() {
+        DigestAuthenticationFilter digestFilter = new DigestAuthenticationFilter();
+        digestFilter.setAuthenticationEntryPoint(myDigestEntryPoint);
+        digestFilter.setUserDetailsService(userDetailsService);
+        return digestFilter;
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -69,15 +81,14 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/admin/api/**").hasAuthority("ROLE_ADMIN")
                 .antMatchers("/user/**").hasRole("USER")
-                .antMatchers("/login/cas", "/app/api/**","/favicon.ico", "/error", "/captcha.jpg", "/session/invalid",
-                        "/csrfLogout").permitAll()
+                .antMatchers("/login/cas", "/app/api/**","/favicon.ico", "/error", "/captcha.jpg", "/session/invalid").permitAll()
                 .anyRequest().authenticated()
-                .and()
+//                .and().httpBasic()
 //                .formLogin().loginPage("/myLogin.html").permitAll()
                 // 自定义URL
 //                .formLogin().loginPage("/myLogin.html").loginProcessingUrl("/login").permitAll()
                 // 登录返回json，不跳转URL
-                .formLogin()
+//                .formLogin()
 //                .formLogin().authenticationDetailsSource(authenticationDetailsSource)
 //                .loginPage("/myLogin.html").loginProcessingUrl("/auth/form").permitAll()
 //                .successHandler((HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) -> {
@@ -101,21 +112,23 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 ////                .key("liuchao")
 //                .tokenRepository(tokenRepository).tokenValiditySeconds(30)
 //                .and()
-                .logout()
+//                .logout()
 //                .logout().logoutUrl("/myLogout")
 //                .logoutSuccessUrl("/")
-                .logoutSuccessHandler((HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) -> {
-                    httpServletResponse.setContentType("application/json;charset=UTF-8");
-                    PrintWriter out = httpServletResponse.getWriter();
-                    out.write("{\"error_code\":\"0\", \"message\":\"欢迎再次登录\"}");
-                })
+//                .logoutSuccessHandler((HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) -> {
+//                    httpServletResponse.setContentType("application/json;charset=UTF-8");
+//                    PrintWriter out = httpServletResponse.getWriter();
+//                    out.write("{\"error_code\":\"0\", \"message\":\"欢迎再次登录\"}");
+//                })
 //                .invalidateHttpSession(true)
 //                .deleteCookies("").addLogoutHandler()
-                .and()
-                .exceptionHandling().authenticationEntryPoint(entryPoint)
-                .and().addFilter(casAuthenticationFilter)
-                .addFilterBefore(singleSignOutFilter, CasAuthenticationFilter.class)
-                .addFilterBefore(logoutFilter, LogoutFilter.class)
+//                .and()
+                .exceptionHandling().authenticationEntryPoint(myDigestEntryPoint)
+                .and().addFilter(digestAuthenticationFilter())
+//                .exceptionHandling().authenticationEntryPoint(entryPoint)
+//                .and().addFilter(casAuthenticationFilter)
+//                .addFilterBefore(singleSignOutFilter, CasAuthenticationFilter.class)
+//                .addFilterBefore(logoutFilter, LogoutFilter.class)
 //                .sessionManagement().sessionFixation().none()
 //                .sessionManagement()
 //                .invalidSessionUrl("/session/invalid")
@@ -127,14 +140,14 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         ;
     }
 
-    @Autowired
-    private SpringSessionBackedSessionRegistry redisSessionRegistry;
+//    @Autowired
+//    private SpringSessionBackedSessionRegistry redisSessionRegistry;
+//
+//    @Autowired
+//    private DataSource dataSource;
 
-    @Autowired
-    private DataSource dataSource;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
+//    @Autowired
+//    private UserDetailsService userDetailsService;
 
 //    @Autowired
 //    private PasswordEncoder passwordEncoder;
@@ -148,8 +161,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 //    @Autowired
 //    private AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource;
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 //        JdbcUserDetailsManager manager = auth
 ////                .inMemoryAuthentication()
 //                .jdbcAuthentication()
@@ -172,8 +185,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 //        auth.authenticationProvider(myAuthenticationProvider);
 
 //        auth.authenticationProvider(myDaoAuthenticationProvider);
-        auth.authenticationProvider(authenticationProvider);
-    }
+//        auth.authenticationProvider(authenticationProvider);
+
+//    }
 
     @Bean
     public Producer captcha() {

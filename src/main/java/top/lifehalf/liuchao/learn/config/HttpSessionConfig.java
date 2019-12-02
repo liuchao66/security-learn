@@ -10,7 +10,6 @@ package top.lifehalf.liuchao.learn.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
@@ -22,7 +21,7 @@ import org.springframework.session.security.SpringSessionBackedSessionRegistry;
  * @author liuchao4
  * @since 2019/11/28 14:45
  */
-@Configuration
+//@Configuration
 public class HttpSessionConfig {
 
     @Autowired

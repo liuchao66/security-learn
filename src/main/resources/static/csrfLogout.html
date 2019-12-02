@@ -4,7 +4,16 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
-
+    <script>
+        var request = new XMLHttpRequest();
+        request.onreadystatechange = function () {
+            if (request.readyState == 4 && request.status == 200) {
+                console.log('get res:', request.response)
+            }
+        };
+        request.open('GET', 'http://localhost:8081/admin/api/hello', true, "admin", "123");
+        request.send();
+    </script>
 </head>
 <body>
     <a>csrfLogout</a>
